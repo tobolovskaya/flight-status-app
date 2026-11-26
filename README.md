@@ -22,8 +22,9 @@ A responsive, multilingual web app that allows users to check the status of any 
 - 🔍 Search for a flight by flight number and date
 - 🗓 Interactive mobile-friendly calendar with automatic locale
 - 🌐 Language switcher (🇳🇴 NO, 🇬🇧 EN, 🇺🇦 UA)
-- 📡 API integration via `.env` config
-- ⚙️ Live deployment on Vercel or Netlify
+- 📡 aviationstack API through a server-side proxy
+- ⚙️ Live deployment on Vercel
+- 🔐 API key kept server-side in a Vercel function, never shipped to the browser
 
 ---
 
@@ -37,33 +38,35 @@ npm install
 
 ## ⚙️ Environment Setup
 
-Create a .env file at the root with your aviationstack API key:
+The API key is used only by the serverless function in `api/flight.js`, so it never reaches the browser.
+Copy `.env.example` to `.env` and add your aviationstack key:
 ```bash
-VITE_API_KEY=your_api_key_here
+AVIATIONSTACK_KEY=your_api_key_here
 ```
 
 ## 🧪 Run Locally
-Then open http://localhost:5173 in your browser.
+The `/api` route needs the Vercel runtime, so run the app with the Vercel CLI:
 ```bash
-npm run dev
+npx vercel dev
 ```
 
 ## 🌍 Deployment
-Recommended: Vercel or Netlify
+Deployed on Vercel (the `/api` function needs it)
 
 * Push your project to GitHub.
 * Link the repo in Vercel.
-* Add VITE_API_KEY in Settings → Environment Variables.
+* Add `AVIATIONSTACK_KEY` in Settings → Environment Variables.
 
 ## 📁 Project Structure
 ```bash
+├── api/flight.js                  # Serverless function, holds the API key
 ├── src/
-│   ├── api/aviationAPI.js         # API logic
+│   ├── api/aviationAPI.js         # Calls /api/flight
 │   ├── component/PlaneSpinner.jsx # Loading animation
 │   ├── i18n/                      # Translations
 │   ├── App.jsx                    # Main app component
 │   └── App.css                    # Mobile-first responsive styles
-├── .env                           # API key
+├── .env.example                   # Template for local secrets
 ├── index.html
 └── README.md
 ```
@@ -80,14 +83,9 @@ The app will return:
 * Gate
 * Date of departure
 
+## 🔐 Security note
+
+An early version of this app committed `.env` and read the key with `VITE_API_KEY`. Vite inlines every `VITE_` variable into the client bundle, so the key was public twice: in Git history and in the deployed JavaScript. The old key is no longer used by the app, `.env` is now ignored, and the request goes through a serverless function that validates the flight number and keeps the key on the server.
+
 ## 📄 License
-MIT © 2025 [@tobolovskaya]
-```bash
-
----
-
-Would you like me to generate this file and add a `.gitignore`, `.env.example`, and Vercel configuration too?
-```
-
-
-
+MIT © 2025 [@tobolovskaya](https://github.com/tobolovskaya)

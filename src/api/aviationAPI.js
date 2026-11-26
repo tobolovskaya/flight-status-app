@@ -1,9 +1,7 @@
-const API_KEY = import.meta.env.VITE_API_KEY; // розмісти ключ у .env
-
 export const fetchFlightStatus = async (flightNumber, date) => {
   try {
     const response = await fetch(
-      `https://api.aviationstack.com/v1/flights?access_key=${API_KEY}&flight_iata=${flightNumber}`
+      `/api/flight?flight_iata=${encodeURIComponent(flightNumber)}`
     );
 
     const data = await response.json();
