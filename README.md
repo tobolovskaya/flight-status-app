@@ -2,6 +2,8 @@
 
 A responsive, multilingual web app that allows users to check the status of any flight by its number and date. Built with React, it features internationalization, mobile-friendly calendar input, and real-time data via [aviationstack.com](https://aviationstack.com/).
 
+**Live demo:** [flight-status-app-sigma.vercel.app](https://flight-status-app-sigma.vercel.app)
+
 ![Mobile Preview](/public/mobile-preview.png)
 
 ---
@@ -72,16 +74,41 @@ Deployed on Vercel (the `/api` function needs it)
 ```
 
 ## 🌐 Example Usage
-1. Enter flight number (e.g., WF101)
-2. Select date (default is today)
-3. Click Search Flight
+1. Enter a flight number in IATA format (e.g. `DY372`)
+2. Select the date (default is today)
+3. Click **Search Flight**
 
-The app will return:
+The app returns:
 
-* Flight status (landed, cancelled, delayed)
+* Flight status (scheduled, active, landed, cancelled, diverted)
 * Destination airport
-* Gate
+* Departure gate
 * Date of departure
+
+## ✅ How to test with Flightradar24
+
+The app uses aviationstack's **real-time** data, so the easiest test is a flight that is in the air right now.
+
+1. Open [flightradar24.com](https://www.flightradar24.com) and click any aircraft on the map, for example over Norway.
+2. Copy the flight number from the panel on the left (e.g. `DY372`, Norwegian, Oslo → Tromsø).
+3. Open the [live demo](https://flight-status-app-sigma.vercel.app), paste the flight number, keep today's date and click **Search Flight**.
+4. Compare the result with Flightradar24: the status should be `active` and the destination should match.
+
+**Check the API directly.** The serverless function can be called without the UI:
+
+```
+https://flight-status-app-sigma.vercel.app/api/flight?flight_iata=DY372
+```
+
+The response contains `data`, `pagination` and `error`:
+
+| Response | Meaning |
+|---|---|
+| `"total": 0`, `"error": null` | The key works, but aviationstack has no real-time record for this flight. Try a flight that is flying now. |
+| `"error": { "code": ... }` | The provider rejected the request, e.g. the monthly limit of the free plan is used up. |
+| `400 Invalid flight number` | The input is not a valid IATA flight number (two characters + 1–4 digits). |
+
+Future dates usually return no result, because the app only looks up real-time flights.
 
 ## 🔐 Security note
 
