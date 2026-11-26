@@ -22,7 +22,13 @@ export default async function handler(req, res) {
     const upstream = await fetch(url);
     const data = await upstream.json();
     res.setHeader("Cache-Control", "s-maxage=60");
-    return res.status(upstream.ok ? 200 : 502).json({ data: data.data ?? null });
+    // Pass on pagination and the provider's error code (never the key),
+    // so an empty result can be told apart from a quota or plan limit.
+    return res.status(upstream.ok ? 200 : 502).json({
+      data: data.data ?? null,
+      pagination: data.pagination ?? null,
+      error: data.error ? { code: data.error.code, message: data.error.message } : null,
+    });
   } catch {
     return res.status(502).json({ error: "Upstream request failed" });
   }
